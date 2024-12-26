@@ -1,2 +1,68 @@
-# BuckshotRouletteCLI
+# BuckshotRouletteCLII(dev.)
 A CLI implementation of Mike Klubnika's Buckshot Roulette game./Mike Klubnika的《恶魔轮盘》游戏的命令行界面实现
+
+《恶魔轮盘》命令行版/Buckshot Roulette in CLI
+
+原作者/Original Author : Mike Klubnika
+
+目前仍在开发和debuging，可能存在bug，欢迎发issue
+
+Still Developing & debuging, create an issue if you found a bug.
+
+## Requirements/依赖
+
+需要Python3，未测试具体版本，应该要求Python3.8及以上版本
+
+需要rich`[>=13.8.0]`库，通过以下命令安装：
+
+    `pip install rich`
+
+或者安装指定版本。
+
+    `pip install rich==13.8.0`
+
+在macOS和Linux上，你可能需要用`pip3`命令而不是`pip`。
+
+另外，你的终端需要支持emoji显示，现在Windows/macOS/通过SSH连接的Linux命令行基本上都已支持。
+
+Python3 required, minimum supported version not tested, possibly >=3.8.
+
+rich`[>=13.8.0]` required ,install it by this command.
+
+    `pip install rich`
+
+or install a specifying version.
+
+    `pip install rich==13.8.0`
+
+You may use `pip3` instead of `pip` on macOS/Linux.
+
+Besides, your terminal should support Emoji display, basically all supported on Windows/macOS/Linux over SSH.
+
+## How to play/玩法
+
+与原作玩法基本一致。
+
+[简体中文 : 游民星空](https://www.gamersky.com/handbook/202404/1728981.shtml)
+
+Basically the same as the original game.
+
+[English : Wikipedia](https://en.wikipedia.org/wiki/Buckshot_Roulette)
+
+## Can I change Game Language?/切换游戏语言
+
+你可以编辑`gameConfig.py`，根据注释提示切换游戏语言或修改其他设置。
+
+你可以修改/创建语言翻译文件`language_*LOCALECODE*.py`。
+
+Editing `gameConfig.py` to change game language or modify game setting according to config file comments.
+
+You can also modify/create a language translation file `language_*LOCALECODE*.py`.
+
+## I'am ready to play!/开始游戏
+
+    `python br.py`
+
+或者/or
+
+    `python3 br.py`
