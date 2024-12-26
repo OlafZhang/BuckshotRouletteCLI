@@ -1,29 +1,26 @@
 # BuckshotRouletteCLI(dev.)
-A CLI implementation of Mike Klubnika's Buckshot Roulette game./Mike Klubnika的《恶魔轮盘》游戏的命令行界面实现
 
-《恶魔轮盘》命令行版/Buckshot Roulette in CLI
+## Introduction
 
-原作者/Original Author : Mike Klubnika
+Buckshot Roulette in CLI
 
-目前仍在开发和debuging，可能存在bug，欢迎发issue
+A CLI implementation of Mike Klubnika's Buckshot Roulette game.
 
-Still Developing & debuging, create an issue if you found a bug.
+Original Author : Mike Klubnika
 
-## Requirements/依赖
+Still Developing & debuging, create an issue if you found a bug.(Simplified Chinese is preferred, followed by English)
 
-需要Python3，未测试具体版本，应该要求Python3.8及以上版本
+## 简介
 
-需要rich`[>=13.8.0]`库，通过以下命令安装：
+《恶魔轮盘》命令行版
 
-    `pip install rich`
+Mike Klubnika的《恶魔轮盘》游戏的命令行界面实现
 
-或者安装指定版本。
+原作者: Mike Klubnika
 
-    `pip install rich==13.8.0`
+目前仍在开发和debuging，可能存在bug，欢迎发issue（优先使用简体中文，其次是英语）
 
-在macOS和Linux上，你可能需要用`pip3`命令而不是`pip`。
-
-另外，你的终端需要支持emoji显示，现在Windows/macOS/通过SSH连接的Linux命令行基本上都已支持。
+## Requirements
 
 Python3 required, minimum supported version not tested, possibly >=3.8.
 
@@ -39,30 +36,58 @@ You may use `pip3` instead of `pip` on macOS/Linux.
 
 Besides, your terminal should support Emoji display, basically all supported on Windows/macOS/Linux over SSH.
 
-## How to play/玩法
+## 依赖
+
+需要Python3，未测试具体版本，应该要求Python3.8及以上版本
+
+需要rich`[>=13.8.0]`库，通过以下命令安装：
+
+    `pip install rich`
+
+或者安装指定版本。
+
+    `pip install rich==13.8.0`
+
+在macOS和Linux上，你可能需要用`pip3`命令而不是`pip`。
+
+另外，你的终端需要支持emoji显示，现在Windows/macOS/通过SSH连接的Linux命令行基本上都已支持。
+
+## 玩法
 
 与原作玩法基本一致。
 
 [简体中文 : 游民星空](https://www.gamersky.com/handbook/202404/1728981.shtml)
 
+## How to play
+
 Basically the same as the original game.
 
 [English : Wikipedia](https://en.wikipedia.org/wiki/Buckshot_Roulette)
 
-## Can I change Game Language?/切换游戏语言
-
-你可以编辑`gameConfig.py`，根据注释提示切换游戏语言或修改其他设置。
-
-你可以修改/创建语言翻译文件`language_*LOCALECODE*.py`。
+## Can I change Game Language?
 
 Editing `gameConfig.py` to change game language or modify game setting according to config file comments.
 
 You can also modify/create a language translation file `language_*LOCALECODE*.py`.
 
-## I'am ready to play!/开始游戏
+## 切换游戏语言
+
+你可以编辑`gameConfig.py`，根据注释提示切换游戏语言或修改其他设置。
+
+你可以修改/创建语言翻译文件`language_*LOCALECODE*.py`。
+
+## I'am ready to play!
 
     `python br.py`
 
-或者/or
+or
+
+    `python3 br.py`
+
+## 开始游戏
+
+    `python br.py`
+
+或者
 
     `python3 br.py`
