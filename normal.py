@@ -9,6 +9,7 @@ elif LANGUAGE == "en":
     from language_en import *
 else:
     print("Unsoported language, use English instead.")
+    time.sleep(3)
     from language_en import *
 
 # 游戏全局变量，会被加入到主游戏循环中
@@ -539,6 +540,10 @@ class Dealer(object):
     # 会一直执行直到庄家没有此类物品或当前子弹已知（在游戏主逻辑编程）
     def thinkCheck(self,CURRENT_BULLET_INDEX):
         # 如果当前子弹未知才需要用放大镜
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT"
         if self.memory[CURRENT_BULLET_INDEX] == -1:
             for i in range(len(self.inventory)):
                 if self.inventory[i].name == "magnifyingGlass":
@@ -588,6 +593,10 @@ class Dealer(object):
     def thinkCheckAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
         if 'adrenaline' not in self.showInventory():
             return 'DONOT'
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT"
         # 如果当前子弹未知才需要用放大镜
         if self.memory[CURRENT_BULLET_INDEX] == -1 and 'magnifyingGlass' in getPlayerInventory:
             tyPrint(LANG_DEALER_USE_ADRENALINE,sleepTime=TYPRINT_SPEED_UP*0.1)
@@ -653,6 +662,10 @@ class Dealer(object):
     # 4.不知道当前子弹类型，且还有至少2颗真子弹
     # 另外，只有玩家的isSkip为False时才能使用手铐
     def thinkHandcuffs(self,getPlayerInventory,CURRENT_BULLET_INDEX):
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT"
         shouldUse = False
         if 'handcuffs' not in self.showInventory():
             return False
@@ -684,6 +697,10 @@ class Dealer(object):
     def thinkHandcuffsAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
         if 'adrenaline' not in self.showInventory():
             return 'DONOT'
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT"
         else:
             shouldUse = False
             if 'handcuffs' not in getPlayerInventory:
@@ -717,8 +734,12 @@ class Dealer(object):
     # 1.当前子弹已知为假弹或可预见剩下的全是假弹
     # 庄家在这种情况下会使用手锯（如果庄家有手锯）：
     # 1.当前子弹已知为真弹或可预见剩下的全是真弹，其中包括通过逆转器转换的真弹
-    def thinkBulletChange(self):
-        if 'inverter' in self.showInventory() and (self.memory[CURRENT_BULLET_INDEX] == 0 or self.unknownLive == 0):
+    def thinkBulletChange(self,CURRENT_BULLET_INDEX):
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT"
+        if 'inverter' in self.showInventory() and (self.memory[CURRENT_BULLET_INDEX] == 0):
             self.memory[CURRENT_BULLET_INDEX] = 1
             for i in range(len(self.inventory)):
                 if self.inventory[i].name == "inverter":
@@ -728,7 +749,7 @@ class Dealer(object):
                     time.sleep(2)
                     break
             return True
-        if 'handSaw' in self.showInventory() and (self.memory[CURRENT_BULLET_INDEX] == 1 or self.unknownBlank == 0):
+        if 'handSaw' in self.showInventory() and (self.memory[CURRENT_BULLET_INDEX] == 1):
             for i in range(len(self.inventory)):
                 if self.inventory[i].name == "handSaw":
                     handSaw.use()
@@ -744,12 +765,16 @@ class Dealer(object):
     # 1.当前子弹已知为假弹或可预见剩下的全是假弹
     # 庄家在这种情况下会抢走玩家的手锯（如果玩家有手锯且庄家有肾上腺素）：
     # 1.当前子弹已知为真弹或可预见剩下的全是真弹，其中包括通过逆转器转换的真弹
-    def thinkBulletChangeAdrenaline(self,getPlayerInventory):
+    def thinkBulletChangeAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT"
         global PLAYER_OBJ
         if 'adrenaline' not in self.showInventory():
             return 'DONOT'
         else:
-            if 'inverter' in getPlayerInventory and (self.memory[CURRENT_BULLET_INDEX] == 0 or self.unknownLive == 0):
+            if 'inverter' in getPlayerInventory and (self.memory[CURRENT_BULLET_INDEX] == 0):
                 self.memory[CURRENT_BULLET_INDEX] = 1
                 for i in range(len(self.inventory)):
                     if self.inventory[i].name == "adrenaline":
@@ -763,7 +788,7 @@ class Dealer(object):
                         time.sleep(2)
                         break
                 return 'inverter'
-            if 'handSaw' in getPlayerInventory and (self.memory[CURRENT_BULLET_INDEX] == 1 or self.unknownBlank == 0):
+            if 'handSaw' in getPlayerInventory and (self.memory[CURRENT_BULLET_INDEX] == 1):
                 for i in range(len(self.inventory)):
                     if self.inventory[i].name == "adrenaline":
                         handSaw.use()
@@ -785,6 +810,10 @@ class Dealer(object):
     # 3、如果不知道，则使用`剩余未知真弹数和剩余未知假弹数`来计算概率，如果真弹数>=假弹数，打对方，否则打自己
     # 无论结果如何，AI必须要选择一个目标
     def thinkShot(self,CURRENT_BULLET_INDEX):
+        try:
+            get = self.memory[CURRENT_BULLET_INDEX]
+        except IndexError:
+            return "DONOT",True
         tyPrint(LANG_DEALER_RAISE_GUN,sleepTime=TYPRINT_SPEED_UP*0.1)
         time.sleep(2)
         if self.memory[CURRENT_BULLET_INDEX] == 1:
@@ -1023,7 +1052,7 @@ def normalGameMainThread(totalRound=3):
                         tyPrint(LANG_PLAYER_BEEN_SKIP,sleepTime=TYPRINT_SPEED_UP*0.1)
                         time.sleep(1)
                         PLAYER_OBJ.isSkip = False
-                        break
+                        continue
                     # 选择道具或射击操作
                     # 注意，如果上一颗是空包弹(前提是这一轮玩家已经开枪)，还能再开一枪
                     while True:
@@ -1053,10 +1082,10 @@ def normalGameMainThread(totalRound=3):
                                         DEALER_OBJ.isSkip = True
                                     elif resultCode == 2:
                                         inverterTimes += 1
-                                        if Dealer.getMemory()[CURRENT_BULLET_INDEX] == 0:
-                                            Dealer.updateMemory(CURRENT_BULLET_INDEX,1)
-                                        elif Dealer.getMemory()[CURRENT_BULLET_INDEX] == 1:
-                                            Dealer.updateMemory(CURRENT_BULLET_INDEX,0)        
+                                        if DEALER_OBJ.getMemory()[CURRENT_BULLET_INDEX] == 0:
+                                            DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX,1)
+                                        elif DEALER_OBJ.getMemory()[CURRENT_BULLET_INDEX] == 1:
+                                            DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX,0)        
                                     elif resultCode == 30:
                                         DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX-1,0)
                                     elif resultCode == 31:
@@ -1091,10 +1120,10 @@ def normalGameMainThread(totalRound=3):
                                                         DEALER_OBJ.isSkip = True
                                                     elif resultCode == 2:
                                                         inverterTimes += 1
-                                                        if Dealer.getMemory()[CURRENT_BULLET_INDEX] == 0:
-                                                            Dealer.updateMemory(CURRENT_BULLET_INDEX,1)
-                                                        elif Dealer.getMemory[CURRENT_BULLET_INDEX] == 1:
-                                                            Dealer.updateMemory(CURRENT_BULLET_INDEX,0)        
+                                                        if DEALER_OBJ.getMemory()[CURRENT_BULLET_INDEX] == 0:
+                                                            DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX,1)
+                                                        elif DEALER_OBJ.getMemory[CURRENT_BULLET_INDEX] == 1:
+                                                            DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX,0)        
                                                     elif resultCode == 30:
                                                         DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX-1,0)
                                                     elif resultCode == 31:
@@ -1284,7 +1313,7 @@ def normalGameMainThread(totalRound=3):
                     tyPrint(LANG_DEALER_BEEN_SKIP,sleepTime=TYPRINT_SPEED_UP*0.1)
                     time.sleep(1)
                     DEALER_OBJ.isSkip = False
-                    break
+                    continue
                 while True:
                     if len(BULLET_LIST) == 0:
                         PLAYER_OBJ.isSkip = False
@@ -1347,13 +1376,13 @@ def normalGameMainThread(totalRound=3):
                                     PLAYER_OBJ.inventory.pop(i)
                                     break
                     # 7.处理子弹事件
-                    result = DEALER_OBJ.thinkBulletChange()
+                    result = DEALER_OBJ.thinkBulletChange(CURRENT_BULLET_INDEX)
                     while result != 'DONOT':
-                        result = DEALER_OBJ.thinkBulletChange()
+                        result = DEALER_OBJ.thinkBulletChange(CURRENT_BULLET_INDEX)
                     # 8.是否需要使用肾上腺素来抢走玩家的道具并处理子弹事件
-                    result = DEALER_OBJ.thinkBulletChangeAdrenaline(PLAYER_OBJ.showInventory())
+                    result = DEALER_OBJ.thinkBulletChangeAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
                     while result != 'DONOT':
-                        result = DEALER_OBJ.thinkBulletChangeAdrenaline(PLAYER_OBJ.showInventory())
+                        result = DEALER_OBJ.thinkBulletChangeAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
                         if result in ["inverter","handSaw"]:
                             for i in range(0,len(PLAYER_OBJ.inventory)):
                                 if PLAYER_OBJ.inventory[i].name == result:
@@ -1385,7 +1414,7 @@ def normalGameMainThread(totalRound=3):
                             time.sleep(2)
                             IS_DAMAGE_UP = False
                             phoneBulletCheck()
-                    else:
+                    elif shouldShotTo == 'player':
                         getDamage = shot()
                         PLAYER_OBJ.healthModify(getDamage)
                         time.sleep(random.randint(2,4))
@@ -1410,7 +1439,7 @@ def normalGameMainThread(totalRound=3):
                             time.sleep(2)
                             IS_DAMAGE_UP = False
                             phoneBulletCheck()
-                    if thisIsUnknown:
+                    if thisIsUnknown and shouldShotTo != 'DONOT':
                         if getDamage == 0:
                             DEALER_OBJ.updateMemory(CURRENT_BULLET_INDEX-1,0)
                         else:

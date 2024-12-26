@@ -1,4 +1,4 @@
-# BuckshotRouletteCLI(dev.)
+# Buckshot Roulette CLI(dev.)
 
 ## Introduction
 

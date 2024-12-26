@@ -3,6 +3,7 @@ from rich.console import Console
 from gameConfig import LANGUAGE
 import time
 import os
+import random
 
 if LANGUAGE == "zhcn":
     from language_zhcn import *
@@ -77,15 +78,11 @@ def displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=False,playerTurn=
     bulletInfo = ""
     dealerLastBulletInfo = ""
     if showBullet:
-        # 拿到子弹排列后直接计数
-        liveCount = 0
-        blankCount = 0
-        for i in BULLET_LIST:
-            if i == 1:
-                liveCount += 1
-            else:
-                blankCount += 1
-        bulletInfo = "："+"🔴"*liveCount+"🔵"*blankCount
+        formated = ["🔴" if str(i) == '1' else "🔵" for i in BULLET_LIST]
+        random.shuffle(formated)
+        bulletInfo = "："
+        for i in formated:
+            bulletInfo += i
     else:
         if dealerLast == 1:
             dealerLastBulletInfo = "🔴  "
