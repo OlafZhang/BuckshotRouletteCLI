@@ -3,6 +3,15 @@ import random
 from gameConfig import *
 from gameDispalay import *
 
+import logging
+from rich.logging import RichHandler
+if debugMode:
+    logging.basicConfig(level="NOTSET", format = '%(message)s', datefmt="[%X]", handlers=[RichHandler()])
+else:
+    logging.basicConfig(level="WARNING", format = '%(message)s', datefmt="[%X]", handlers=[RichHandler()])
+
+logger = logging.getLogger(__name__)
+ 
 if LANGUAGE == "zhcn":
     from language_zhcn import *
 elif LANGUAGE == "en":
@@ -358,6 +367,7 @@ class Dealer(object):
     # 记忆重置
     # 如果子弹打空了还没分出胜负，重新装填后调用这个方法
     def resetMemory(self,live,blank):
+        logger.debug(f'记忆已重置，真弹数：{live}，空包弹数：{blank}')
         self.memory = []
         self.totalLive = live
         self.totalBlank = blank
@@ -370,6 +380,7 @@ class Dealer(object):
     # 手动更新庄家AI
     # 因为有逆转器这个道具
     def updateMemory(self,index,bulletType):
+        logger.debug(f'更新记忆：{index}号子弹为{bulletType}')
         try:
             self.memory[index] = bulletType
             self.flushMemory()
@@ -406,6 +417,8 @@ class Dealer(object):
             for i in range(len(self.memory)):
                 if self.memory[i] == -1:
                     self.memory[i] = 1
+        logger.debug(f'记忆刷新结果：未知真弹数：{self.unknownLive}，未知空包弹数：{self.unknownBlank}')
+        logger.debug(f'当前记忆：{self.memory}') 
 
     def healthModify(self, num):
         if self.health + num > self.totalHealth:
@@ -813,21 +826,30 @@ class Dealer(object):
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
         except IndexError:
+            logger.debug(f'无法决策')
             return "DONOT",True
         tyPrint(LANG_DEALER_RAISE_GUN,sleepTime=TYPRINT_SPEED_UP*0.1)
         time.sleep(2)
         if self.memory[CURRENT_BULLET_INDEX] == 1:
             tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
+            logger.debug(f'决策射击对象：玩家')
+            logger.debug(f'当前子弹已知/可预测')
             return 'player',False
         elif self.memory[CURRENT_BULLET_INDEX] == 0:
             tyPrint(LANG_DEALER_AIM_SELF,sleepTime=TYPRINT_SPEED_UP*0.1)
+            logger.debug(f'决策射击对象：庄家')
+            logger.debug(f'当前子弹已知/可预测')
             return 'dealer',False
         else:
             if self.unknownLive >= self.unknownBlank:
                 tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
+                logger.debug(f'决策射击对象：玩家')
+                logger.debug(f'当前子弹未知/不可预测')
                 return 'player',True
             else:
                 tyPrint(LANG_DEALER_AIM_SELF,sleepTime=TYPRINT_SPEED_UP*0.1)
+                logger.debug(f'决策射击对象：庄家')
+                logger.debug(f'当前子弹未知/不可预测')
                 return 'dealer',True
 
 
@@ -843,14 +865,18 @@ class Dealer(object):
 # 玩家预设中所有子弹加起来不能超过10（会有配置文件设置器来约束这个条件）
 # 随机参数的话，实弹或空弹不会超过5颗，这两种子弹至少会有1颗
 def bulletDecision():
-    global BULLET_LIST,USE_RANDOM_BULLET,INIT_BULLET_LIST
+    global BULLET_LIST,USE_RANDOM_BULLET,INIT_BULLET_LIST,CURRENT_BULLET_INDEX
     live = 0
     blank = 0
+    CURRENT_BULLET_INDEX = 0
     if USE_RANDOM_BULLET:
+        logger.debug('使用随机选择')
         live = random.randint(1,5)
         blank = random.randint(1,5)
     else:
+        logger.debug('使用预设')
         choice = random.choice(INIT_BULLET_LIST)
+        logger.debug(f'选择预设：{choice}')
         live = choice[0]
         blank = choice[1]
     for i in range(0,live):
@@ -859,6 +885,7 @@ def bulletDecision():
         BULLET_LIST.append(0)
     for i in range(0,10):
         random.shuffle(BULLET_LIST)
+    logger.debug(f'已完成装弹：{BULLET_LIST}')
     return live,blank
 
 # “签署生死状”函数
@@ -867,6 +894,7 @@ def signWaiver():
     global PLAYER_NAME
     tyPrint(LANG_ASK_SIGN_WAIVER,sleepTime=TYPRINT_SPEED_UP*0.05)
     time.sleep(1)
+    logger.debug('要求用户输入玩家名')
     while True:
         userName = input(LANG_SIGN_WAIVER_EXPLANATION)
         userName = userName.strip()
@@ -879,6 +907,7 @@ def signWaiver():
         if userName in ["GOD","DEALER","SATAN"]:
             continue
         PLAYER_NAME = userName
+        logger.debug(f'玩家名为{PLAYER_NAME}')
         return True
 
 # 生成确定的子弹位置
@@ -917,6 +946,7 @@ def normalGameMainThread(totalRound=3):
     # 循环逻辑
     while True:
         clear()
+        logger.debug('游戏主循环开始')
         signWaiver()
         isPlayerDeath = 0
         tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
@@ -925,6 +955,7 @@ def normalGameMainThread(totalRound=3):
         time.sleep(1)
         # 这里是每一局开始前的初始化代码
         for thisRound in range(1,totalRound+1):
+            logger.debug(f'局：{thisRound}/{totalRound}')
             if thisRound >= 2:
                 tyPrint(LANG_ENTRY_NEXT_ROUND,sleepTime=TYPRINT_SPEED_UP*0.05)
                 time.sleep(2)
@@ -938,10 +969,12 @@ def normalGameMainThread(totalRound=3):
             healthForEach = random.randint(HEALTH_RANGE[0],HEALTH_RANGE[1])
             tyPrint("⚡"*healthForEach,sleepTime=TYPRINT_SPEED_UP*0.05,endWithNewLine=False)
             tyPrint(f"{LANG_HEALTH_ATHEAD}{cText(healthForEach,'yellow')}{LANG_HEALTH_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
+            logger.debug(f'分配生命值：{healthForEach}')
             time.sleep(1)
             # 初始化玩家对象和庄家对象
             # 初始化弹夹，函数已装填子弹，这里返回的子弹组合情况
             thisLive,thisBlank = bulletDecision()
+            logger.debug(f'真弹:假弹={thisLive}:{thisBlank}')
             PLAYER_OBJ = Player(healthForEach)
             # 庄家初始化前还需要告诉庄家这一局的子弹组合情况
             # 如果胜负未分，需要调用庄家的初始化函数resetMemory将记忆重置
@@ -953,6 +986,7 @@ def normalGameMainThread(totalRound=3):
                 time.sleep(1)
                 for i in range(0,itemNumForEach):
                     if len(PLAYER_OBJ.inventory) >= 8:
+                        logger.debug(f'玩家的道具栏已满')
                         # 随机获取一个物品名称来嘲讽玩家
                         playerPickUp = cText(ALL_ITEM_LIST_STRING_TRANS[random.choice(ALL_ITEM_LIST_STRING)],'yellow')
                         tyPrint(LANG_ITEM_OUT_OF_SPACE,sleepTime=TYPRINT_SPEED_UP*0.05)
@@ -964,13 +998,15 @@ def normalGameMainThread(totalRound=3):
                         break
                     else:
                         playerPickUp = PLAYER_OBJ.addItem()
+                        logger.debug(f'玩家道具添加结果：{playerPickUp}')
                         tyPrint(f"{LANG_ITEM_PLAYER_GET_ATHEAD}{cText(ALL_ITEM_LIST_STRING_TRANS[playerPickUp],'yellow')}{LANG_ITEM_PLAYER_GET_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
                         time.sleep(1)
                 for i in range(0,itemNumForEach):
                     if len(DEALER_OBJ.inventory) >= 8:
                         break
                     else:
-                        DEALER_OBJ.addItem()
+                        dealerPickUp = DEALER_OBJ.addItem()
+                        logger.debug(f'庄家道具添加结果：{dealerPickUp}')
                 
             # 显示赌桌，展示子弹组合情况
             displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,showBullet=True,thisRound=thisRound,totalRound=totalRound)
@@ -1064,9 +1100,9 @@ def normalGameMainThread(totalRound=3):
                         displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=IS_DAMAGE_UP,playerTurn=True,thisRound=thisRound,totalRound=totalRound,dealerLast=DEALER_LAST_BULLET,playerLast=PLAYER_LAST_BULLET)
                         userCanContinue = True
                         # debug
-                        # print(f"当前子弹index:{CURRENT_BULLET_INDEX}")
-                        # print(f"当前弹夹:{BULLET_LIST}")
-                        # print(f"手机确定的index:{PHONE_BULLET_INDEX}")
+                        logger.debug(f"当前子弹index:{CURRENT_BULLET_INDEX}")
+                        logger.debug(f"当前弹夹：{BULLET_LIST}")
+                        logger.debug(f"手机确定的index:{PHONE_BULLET_INDEX}")
                         userSelect = input(LANG_PLAYER_SELECT_ITEM_OR_SHOOT)
                         if str(userSelect).isdigit():
                             # 你没道具了你用啥道具？
@@ -1323,10 +1359,13 @@ def normalGameMainThread(totalRound=3):
                     # AI逻辑
                     # 1.检查生命值
                     result = DEALER_OBJ.thinkHealth()
+                    logger.debug(f'检查生命值逻辑结果：{result}')
                     while result != 'DONOT':
                         result = DEALER_OBJ.thinkHealth()
+                        logger.debug(f'检查生命值逻辑结果：{result}')
                     # 2.检查是否能通过肾上腺素来抢走玩家的道具并恢复生命值
                     result = DEALER_OBJ.thinkHealthAdrenaline(PLAYER_OBJ.showInventory())
+                    logger.debug(f'检查生命值（肾上腺素）逻辑结果：{result}')
                     if result in ["cigarette","expiredMedicine"]:
                         for i in range(0,len(PLAYER_OBJ.inventory)):
                             if PLAYER_OBJ.inventory[i].name == result:
@@ -1334,6 +1373,7 @@ def normalGameMainThread(totalRound=3):
                                 break
                     while result != 'DONOT':
                         result = DEALER_OBJ.thinkHealthAdrenaline(PLAYER_OBJ.showInventory())
+                        logger.debug(f'检查生命值（肾上腺素）逻辑结果：{result}')
                         if result in ["cigarette","expiredMedicine"]:
                             for i in range(0,len(PLAYER_OBJ.inventory)):
                                 if PLAYER_OBJ.inventory[i].name == result:
@@ -1341,10 +1381,13 @@ def normalGameMainThread(totalRound=3):
                                     break
                     # 3.检查是否能查验子弹
                     result = DEALER_OBJ.thinkCheck(CURRENT_BULLET_INDEX)
+                    logger.debug(f'查验子弹逻辑结果：{result}')
                     while result != 'DONOT':
                         result = DEALER_OBJ.thinkCheck(CURRENT_BULLET_INDEX)
+                        logger.debug(f'查验子弹逻辑结果：{result}')
                     # 4.检查是否能通过肾上腺素来抢走玩家的道具并查验子弹
                     result = DEALER_OBJ.thinkCheckAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
+                    logger.debug(f'查验子弹（肾上腺素）逻辑结果：{result}')
                     if result in ["magnifyingGlass","phone","beer"]:
                         for i in range(0,len(PLAYER_OBJ.inventory)):
                             if PLAYER_OBJ.inventory[i].name == result:
@@ -1352,6 +1395,7 @@ def normalGameMainThread(totalRound=3):
                                 break
                     while result != 'DONOT':
                         result = DEALER_OBJ.thinkCheckAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
+                        logger.debug(f'查验子弹（肾上腺素）逻辑结果：{result}')
                         if result in ["magnifyingGlass","phone","beer"]:
                             for i in range(0,len(PLAYER_OBJ.inventory)):
                                 if PLAYER_OBJ.inventory[i].name == result:
@@ -1361,7 +1405,9 @@ def normalGameMainThread(totalRound=3):
                     # 这个函数比较特殊，不需要do while
                     # 返回True：AI认为需要铐住玩家
                     # 返回False：AI认为不需要铐住玩家/不具备铐住玩家的条件
-                    if DEALER_OBJ.thinkHandcuffs(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX) == True:
+                    result = DEALER_OBJ.thinkHandcuffs(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
+                    logger.debug(f'手铐逻辑结果：{result}')
+                    if result == True:
                         PLAYER_OBJ.isSkip = True
                     # 6.检查是否有肾上腺素且需要抢走玩家的手铐
                     # 同样，不需要do while
@@ -1369,7 +1415,9 @@ def normalGameMainThread(totalRound=3):
                     # 返回True：AI认为需要抢走玩家的手铐
                     # 返回False：AI认为不需要抢走玩家的手铐/不具备铐住玩家的条件/玩家没有手铐
                     if not PLAYER_OBJ.isSkip:
-                        if DEALER_OBJ.thinkHandcuffsAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX) == True:
+                        result = DEALER_OBJ.thinkHandcuffs(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
+                        logger.debug(f'手铐逻辑（肾上腺素）结果：{result}')
+                        if result == True:
                             PLAYER_OBJ.isSkip = True
                             for i in range(0,len(PLAYER_OBJ.inventory)):
                                 if PLAYER_OBJ.inventory[i].name == "handcuffs":
@@ -1377,18 +1425,25 @@ def normalGameMainThread(totalRound=3):
                                     break
                     # 7.处理子弹事件
                     result = DEALER_OBJ.thinkBulletChange(CURRENT_BULLET_INDEX)
+                    logger.debug(f'子弹事件逻辑结果：{result}')
                     while result != 'DONOT':
                         result = DEALER_OBJ.thinkBulletChange(CURRENT_BULLET_INDEX)
+                        logger.debug(f'子弹事件逻辑结果：{result}')
                     # 8.是否需要使用肾上腺素来抢走玩家的道具并处理子弹事件
                     result = DEALER_OBJ.thinkBulletChangeAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
+                    logger.debug(f'子弹事件逻辑（肾上腺素）结果：{result}')
                     while result != 'DONOT':
                         result = DEALER_OBJ.thinkBulletChangeAdrenaline(PLAYER_OBJ.showInventory(),CURRENT_BULLET_INDEX)
+                        logger.debug(f'子弹事件逻辑（肾上腺素）结果：{result}')
                         if result in ["inverter","handSaw"]:
                             for i in range(0,len(PLAYER_OBJ.inventory)):
                                 if PLAYER_OBJ.inventory[i].name == result:
                                     PLAYER_OBJ.inventory.pop(i)
                                     break
                     # 9.最终决策
+                    logger.debug(f'当前子弹index：{CURRENT_BULLET_INDEX}')
+                    logger.debug(f'当前弹夹：{BULLET_LIST}')
+                    logger.debug(f'AI庄家记忆：{DEALER_OBJ.getMemory()}')
                     shouldShotTo,thisIsUnknown = DEALER_OBJ.thinkShot(CURRENT_BULLET_INDEX)
                     if shouldShotTo == 'dealer':
                         getDamage = shot()

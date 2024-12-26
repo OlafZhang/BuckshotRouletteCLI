@@ -1,4 +1,4 @@
-from gameConfig import LANGUAGE,TOTAL_ROUND
+from gameConfig import LANGUAGE,TOTAL_ROUND,debugMode
 import os
 import time
 
@@ -17,7 +17,10 @@ try:
     while True:
         print(f"{LANG_ENTRY_TITLE}")
         print(f"{LANG_ENTRY_SUBTITLE_1}")
-        print("")
+        if debugMode:
+            print(">Debug mode enabled.<")
+        else:
+            print("")
         print(f"1) {LANG_ENTRY_SELECT_1}")
         print(f"2) {LANG_ENTRY_SELECT_2}")
         print(f"3) {LANG_ENTRY_SELECT_3}")
