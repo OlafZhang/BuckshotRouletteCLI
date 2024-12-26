@@ -34,7 +34,7 @@ or install a specifying version.
 
 You may use `pip3` instead of `pip` on macOS/Linux.
 
-Besides, your terminal should support Emoji display, basically all supported on Windows/macOS/Linux over SSH.
+Besides, your terminal should support Emoji display, basically all supported on Windows/macOS/Linux over SSH and terminal on GUI.
 
 ## 依赖
 
@@ -50,7 +50,32 @@ Besides, your terminal should support Emoji display, basically all supported on 
 
 在macOS和Linux上，你可能需要用`pip3`命令而不是`pip`。
 
-另外，你的终端需要支持emoji显示，现在Windows/macOS/通过SSH连接的Linux命令行基本上都已支持。
+另外，你的终端需要支持emoji显示，现在Windows/macOS/通过SSH连接的Linux命令行和Linux图形界面下的终端基本上都已支持。
+
+## Emoji supported terminal/支持emoji的终端
+
+    ✅：Support/支持
+    ❌: Unsupport/不支持
+    ⚠️：Support but have display problem/支持，但存在显示问题
+
+| 💻 | ❓ |
+| ----------- | ----------- |
+| MobaXterm | ⚠️ |
+| Xshell | ⚠️ |
+| Termux | ✅ |
+| Termius | ✅ |
+| bash | ✅ |
+| zsh | ✅ |
+| zsh(macOS) | ✅ |
+| Windows Terminal(Windows 11) | ✅ |
+| cmd.exe | ⚠️ |
+| CLI tty | ❌ |
+| PuTTY | ⚠️ |
+
+You may install emoji fonts or install `fonts-noto-color-emoji` package or `noto-fonts-emoji` package on Linux.
+
+在Linux，你可能需要安装emoji字体或者安装`fonts-noto-color-emoji`或者`noto-fonts-emoji`
+
 
 ## 玩法
 
