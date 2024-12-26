@@ -356,6 +356,7 @@ class Dealer(object):
         self.unknownBlank = self.totalBlank
         self.remainLive = self.totalLive
         self.remainBlank = self.totalBlank
+        self.memoryPlayerIsSkip = False
         # 需要进行AI逻辑初始化（记忆初始化）
         # 就连AI也不允许直接查看弹夹
         for i in range(totalBlank+totalLive):
@@ -462,6 +463,7 @@ class Dealer(object):
     # 处理生命值逻辑
     # 会一直执行这个逻辑直到生命值恢复到满值或庄家物品栏没有这类物品（在游戏主逻辑编程）
     def thinkHealth(self):
+        logger.debug(f'执行生命值逻辑决策')
         # 判断是否负伤
         if self.health < self.totalHealth:
             # 只有生命值大于等于2才会考虑是否使用过期药品
@@ -502,6 +504,7 @@ class Dealer(object):
     # 返回了物品名：成功偷走玩家物品并使用
     # 返回了DONOT：需要跳出逻辑循环
     def thinkHealthAdrenaline(self,getPlayerInventory):
+        logger.debug(f'执行生命值逻辑决策（肾上腺素）')
         # 没有肾上腺素你偷啥？
         if 'adrenaline' not in self.showInventory():
             return 'DONOT'
@@ -552,6 +555,7 @@ class Dealer(object):
     # 优先使用放大镜，其次是手机和啤酒
     # 会一直执行直到庄家没有此类物品或当前子弹已知（在游戏主逻辑编程）
     def thinkCheck(self,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行查验逻辑逻辑决策')
         # 如果当前子弹未知才需要用放大镜
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
@@ -604,6 +608,7 @@ class Dealer(object):
     # 会一直执行直到玩家没有此类物品或当前子弹已知（在游戏主逻辑编程）
     # 必须要在游戏主逻辑调用flushMemory方法
     def thinkCheckAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行查验逻辑逻辑决策（肾上腺素）')
         if 'adrenaline' not in self.showInventory():
             return 'DONOT'
         try:
@@ -675,6 +680,7 @@ class Dealer(object):
     # 4.不知道当前子弹类型，且还有至少2颗真子弹
     # 另外，只有玩家的isSkip为False时才能使用手铐
     def thinkHandcuffs(self,getPlayerInventory,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行手铐逻辑决策')
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
         except IndexError:
@@ -698,6 +704,7 @@ class Dealer(object):
                     time.sleep(2)
                     tyPrint(LANG_DEALER_USE_HANDCUFFS_EXPLANATION,sleepTime=TYPRINT_SPEED_UP*0.1)
                     time.sleep(2)
+                    self.memoryPlayerIsSkip = True
                     break
         return shouldUse
 
@@ -708,7 +715,10 @@ class Dealer(object):
     # 4.不知道当前子弹类型，且还有至少2颗真子弹
     # 庄家还有肾上腺素且玩家有逆转器的情况下，视为庄家有逆转器
     def thinkHandcuffsAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行手铐逻辑决策（肾上腺素）')
         if 'adrenaline' not in self.showInventory():
+            return 'DONOT'
+        if self.memoryPlayerIsSkip == True:
             return 'DONOT'
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
@@ -739,6 +749,7 @@ class Dealer(object):
                         time.sleep(2)
                         tyPrint(LANG_DEALER_USE_HANDCUFFS_EXPLANATION,sleepTime=TYPRINT_SPEED_UP*0.1)
                         time.sleep(2)
+                        self.memoryPlayerIsSkip = True
                         break
         return shouldUse
     
@@ -748,6 +759,7 @@ class Dealer(object):
     # 庄家在这种情况下会使用手锯（如果庄家有手锯）：
     # 1.当前子弹已知为真弹或可预见剩下的全是真弹，其中包括通过逆转器转换的真弹
     def thinkBulletChange(self,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行子弹事件逻辑决策')
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
         except IndexError:
@@ -779,6 +791,7 @@ class Dealer(object):
     # 庄家在这种情况下会抢走玩家的手锯（如果玩家有手锯且庄家有肾上腺素）：
     # 1.当前子弹已知为真弹或可预见剩下的全是真弹，其中包括通过逆转器转换的真弹
     def thinkBulletChangeAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行子弹事件逻辑决策（肾上腺素）')
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
         except IndexError:
@@ -823,6 +836,7 @@ class Dealer(object):
     # 3、如果不知道，则使用`剩余未知真弹数和剩余未知假弹数`来计算概率，如果真弹数>=假弹数，打对方，否则打自己
     # 无论结果如何，AI必须要选择一个目标
     def thinkShot(self,CURRENT_BULLET_INDEX):
+        logger.debug(f'执行决策')
         try:
             get = self.memory[CURRENT_BULLET_INDEX]
         except IndexError:
@@ -830,26 +844,34 @@ class Dealer(object):
             return "DONOT",True
         tyPrint(LANG_DEALER_RAISE_GUN,sleepTime=TYPRINT_SPEED_UP*0.1)
         time.sleep(2)
-        if self.memory[CURRENT_BULLET_INDEX] == 1:
-            tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
+        # 特别的：如果玩家被庄家铐住，直接射击
+        if self.memoryPlayerIsSkip == True:
+            self.memoryPlayerIsSkip = False
             logger.debug(f'决策射击对象：玩家')
-            logger.debug(f'当前子弹已知/可预测')
+            logger.debug(f'决定方式：玩家因庄家手铐逻辑被铐住')
+            tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
+            return 'player',False
+        self.memoryPlayerIsSkip = False
+        if self.memory[CURRENT_BULLET_INDEX] == 1:
+            logger.debug(f'决策射击对象：玩家')
+            logger.debug(f'决定方式：基于记忆/查验结果/推测')
+            tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
             return 'player',False
         elif self.memory[CURRENT_BULLET_INDEX] == 0:
-            tyPrint(LANG_DEALER_AIM_SELF,sleepTime=TYPRINT_SPEED_UP*0.1)
             logger.debug(f'决策射击对象：庄家')
-            logger.debug(f'当前子弹已知/可预测')
+            logger.debug(f'决定方式：基于记忆/查验结果/推测')
+            tyPrint(LANG_DEALER_AIM_SELF,sleepTime=TYPRINT_SPEED_UP*0.1)
             return 'dealer',False
         else:
             if self.unknownLive >= self.unknownBlank:
-                tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
                 logger.debug(f'决策射击对象：玩家')
-                logger.debug(f'当前子弹未知/不可预测')
+                logger.debug(f'决定方式：基于概率')
+                tyPrint(LANG_DEALER_AIM_YOU,sleepTime=TYPRINT_SPEED_UP*0.1)
                 return 'player',True
             else:
-                tyPrint(LANG_DEALER_AIM_SELF,sleepTime=TYPRINT_SPEED_UP*0.1)
                 logger.debug(f'决策射击对象：庄家')
-                logger.debug(f'当前子弹未知/不可预测')
+                logger.debug(f'决定方式：基于概率')
+                tyPrint(LANG_DEALER_AIM_SELF,sleepTime=TYPRINT_SPEED_UP*0.1)
                 return 'dealer',True
 
 
@@ -869,6 +891,7 @@ def bulletDecision():
     live = 0
     blank = 0
     CURRENT_BULLET_INDEX = 0
+    BULLET_LIST = []
     if USE_RANDOM_BULLET:
         logger.debug('使用随机选择')
         live = random.randint(1,5)
@@ -1015,6 +1038,7 @@ def normalGameMainThread(totalRound=3):
             clear()
             # 生命值归零判断主循环
             while not isGameOver:
+                logger.debug(f'进入生命值归零判断主循环')
                 # 玩家/庄家是否死亡
                 if PLAYER_OBJ.health <= 0:
                     isGameOver = True
@@ -1115,7 +1139,11 @@ def normalGameMainThread(totalRound=3):
                                 if str(itemConfirm) == '1':
                                     resultCode = PLAYER_OBJ.useItem(int(userSelect))
                                     if resultCode == 1:
-                                        DEALER_OBJ.isSkip = True
+                                        if not DEALER_OBJ.isSkip:
+                                            DEALER_OBJ.isSkip = True
+                                        else:
+                                            tyPrint(LANG_PLAYER_ADRENALINE_FAIL_HANDCUFFS_REASON,sleepTime=TYPRINT_SPEED_UP*0.1)
+                                            PLAYER_OBJ.inventory.append(inverter())
                                     elif resultCode == 2:
                                         inverterTimes += 1
                                         if DEALER_OBJ.getMemory()[CURRENT_BULLET_INDEX] == 0:
@@ -1228,7 +1256,8 @@ def normalGameMainThread(totalRound=3):
                                     time.sleep(random.randint(2,4))
                                     if getDamage == 0:
                                         PLAYER_LAST_BULLET = 0
-                                        userCanContinue = True
+                                        if len(BULLET_LIST) != 0:
+                                            userCanContinue = True
                                         tyPrint(LANG_SOUND_CLINK,sleepTime=TYPRINT_SPEED_UP*0.1)
                                         time.sleep(1)
                                         tyPrint(LANG_PLAYER_SHOOT_BLANK,sleepTime=TYPRINT_SPEED_UP*0.1)
@@ -1451,7 +1480,8 @@ def normalGameMainThread(totalRound=3):
                         time.sleep(random.randint(2,4))
                         if getDamage == 0:
                             DEALER_LAST_BULLET = 0
-                            dealerCanContinue = True
+                            if len(BULLET_LIST) != 0:
+                                dealerCanContinue = True
                             tyPrint(LANG_SOUND_CLINK,sleepTime=TYPRINT_SPEED_UP*0.1)
                             time.sleep(1)
                             tyPrint(LANG_DEALER_SHOOT_BLANK,sleepTime=TYPRINT_SPEED_UP*0.1)
@@ -1555,17 +1585,19 @@ def normalGameMainThread(totalRound=3):
                     time.sleep(5)
                     clear()
                     continue
-
+            logger.debug(f'退出生命值归零判断主循环')
             # 走到这里说明主循环被跳出，检查是谁的生命值归零
             # 如果是玩家生命值归零，玩家死亡，主游戏逻辑退出
             # 如果是庄家生命值归零，庄家死亡，进入下一局
             if PLAYER_OBJ.health == 0:
+                logger.debug(f'玩家死亡')
                 tyPrint(LANG_YOU_DIED)
                 time.sleep(5)
                 isPlayerDeath = 1
                 break
             else:
                 clear()
+                logger.debug(f'玩家胜利')
                 print(f"{PLAYER_NAME}{LANG_YOU_WIN}")
                 isGameOver=False
                 time.sleep(5)
