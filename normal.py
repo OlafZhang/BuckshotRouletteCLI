@@ -1505,7 +1505,8 @@ def normalGameMainThread(totalRound=3):
             # 如果是玩家生命值归零，玩家死亡，主游戏逻辑退出
             # 如果是庄家生命值归零，庄家死亡，进入下一局
             if PLAYER_OBJ.health == 0:
-                print(LANG_YOU_DIED)
+                tyPrint(LANG_YOU_DIED)
+                time.sleep(5)
                 isPlayerDeath = 1
                 break
             else:
@@ -1516,4 +1517,3 @@ def normalGameMainThread(totalRound=3):
                 continue
         if isPlayerDeath:
             break
-
