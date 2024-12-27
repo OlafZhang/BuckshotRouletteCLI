@@ -793,7 +793,6 @@ class Dealer(object):
             logger.debug(f'无法决策')
             return "DONOT",True
 
-
 # ----------------------------------------------
 
 
