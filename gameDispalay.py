@@ -45,7 +45,7 @@ def tyPrint(text,sleepTime=0.1,endWithNewLine=True):
 def clear():
     os.system("cls") if os.name == "nt" else os.system("clear")
 
-def displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=False,playerTurn=True,showBullet=False,thisRound=1,totalRound=3,dealerLast=-1,playerLast=-1):
+def displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=False,playerTurn=True,showBullet=False,thisRound=1,totalRound=3,dealerLast=-1,playerLast=-1,cheatMode=False):
     console = Console()
     table = Table(title="")
     if DEALER_OBJ.isSkip:
@@ -79,7 +79,8 @@ def displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=False,playerTurn=
     dealerLastBulletInfo = ""
     if showBullet:
         formated = ["🔴" if str(i) == '1' else "🔵" for i in BULLET_LIST]
-        random.shuffle(formated)
+        if not cheatMode:
+            random.shuffle(formated)
         bulletInfo = "："
         for i in formated:
             bulletInfo += i
