@@ -35,6 +35,7 @@ try:
             clear()
             from normal import normalGameMainThread
             normalGameMainThread(totalRound=TOTAL_ROUND)
+            continue
         elif choice == "3":
             clear()
             break
