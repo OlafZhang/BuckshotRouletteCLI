@@ -7,9 +7,9 @@ import logging
 from rich.logging import RichHandler
 if debugMode:
     # To file.
-    # logging.basicConfig(level="NOTSET",filename='br.log',filemode='a',format ='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt="[%X]")
+    logging.basicConfig(level="NOTSET",filename='br.log',filemode='a',format ='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt="[%X]")
     # On screen.
-    logging.basicConfig(level="NOTSET",format='%(message)s', datefmt="[%X]", handlers=[RichHandler()])
+    # logging.basicConfig(level="NOTSET",format='%(message)s', datefmt="[%X]", handlers=[RichHandler()])
 else:
     logging.basicConfig(level="WARNING", format = '%(message)s', datefmt="[%X]")
 
@@ -316,7 +316,7 @@ class Player(object):
                 self.healthModify(2)
             else:
                 print()
-                clear(debugMode)
+                clear()
                 tyPrint(f"{LANG_PLAYER_USE_EXPIREDMEDICINE_EXPLANATION_FAIL_ATHEAD}{cText('1','red')}{LANG_PLAYER_USE_EXPIREDMEDICINE_EXPLANATION_FAIL_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.1)
                 self.healthModify(-1)
             self.inventory.pop(index)
@@ -515,9 +515,6 @@ class Dealer(object):
     # 会一直执行直到庄家没有此类物品或当前子弹已知（在游戏主逻辑编程）
     def thinkCheck(self,CURRENT_BULLET_INDEX):
         logger.debug(f'执行查验逻辑逻辑决策')
-        # 全是真弹/假弹就不用查了
-        if self.remainLive == 0 or self.remainBlank == 0:
-            return 'DONOT'
         # 如果当前子弹未知才需要用放大镜
         if CURRENT_BULLET_INDEX not in self.memory:
             for i in range(len(self.inventory)):
@@ -569,9 +566,6 @@ class Dealer(object):
     def thinkCheckAdrenaline(self,getPlayerInventory,CURRENT_BULLET_INDEX):
         logger.debug(f'执行查验逻辑逻辑决策（肾上腺素）')
         if 'adrenaline' not in self.showInventory():
-            return 'DONOT'
-        # 全是真弹/假弹就不用查了
-        if self.remainLive == 0 or self.remainBlank == 0:
             return 'DONOT'
         # 如果当前子弹未知才需要用放大镜
         if CURRENT_BULLET_INDEX not in self.memory and 'magnifyingGlass' in getPlayerInventory:
@@ -893,34 +887,33 @@ def normalGameMainThread(totalRound=3):
     cheatMode = False
     # 循环逻辑
     while True:
-        clear(debugMode)
+        clear()
         logger.debug('游戏主循环开始')
-        if PLAYER_NAME == "":
-            signWaiver()
-            # 彩蛋
-            # 树懒都很慢
-            if PLAYER_NAME == "FOLIVO":
-                logger.debug('彩蛋：玩家为树懒时，TYPRINT_SPEED_UP设置为5，这会导致tyPrint方法输出变得非常慢')
-                TYPRINT_SPEED_UP = 5
-            # 你很急？
-            if PLAYER_NAME == "HURRY":
-                logger.debug('彩蛋：玩家很急，TYPRINT_SPEED_UP设置为0.05，这会导致tyPrint方法效果与print方法几乎一致')
-                TYPRINT_SPEED_UP = 0.05
-            if PLAYER_NAME == "JESUS":
-                logger.debug('彩蛋：耶稣能在装弹前看到本轮弹夹的子弹顺序')
-                cheatMode = True
-            # 开发者可以是恶魔
-            if PLAYER_NAME == "OLAF":
-                logger.debug('彩蛋：说一下开发者是恶魔，其它没什么变化')
-                tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(LANG_DEVIL,'yellow')} {cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
-                time.sleep(2)
-                tyPrint(f"{LANG_DEALER_VERY_INTERSTING}",sleepTime=TYPRINT_SPEED_UP*0.05)
-            else:
-                tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
-            isPlayerDeath = 0 
-            time.sleep(1)
-            tyPrint(LANG_TAKE_SEAT,sleepTime=TYPRINT_SPEED_UP*0.05)
-            time.sleep(1)
+        signWaiver()
+        # 彩蛋
+        # 树懒都很慢
+        if PLAYER_NAME == "FOLIVO":
+            logger.debug('彩蛋：玩家为树懒时，TYPRINT_SPEED_UP设置为5，这会导致tyPrint方法输出变得非常慢')
+            TYPRINT_SPEED_UP = 5
+        # 你很急？
+        if PLAYER_NAME == "HURRY":
+            logger.debug('彩蛋：玩家很急，TYPRINT_SPEED_UP设置为0.05，这会导致tyPrint方法效果与print方法几乎一致')
+            TYPRINT_SPEED_UP = 0.05
+        if PLAYER_NAME == "JESUS":
+            logger.debug('彩蛋：耶稣能在装弹前看到本轮弹夹的子弹顺序')
+            cheatMode = True
+        # 开发者可以是恶魔
+        if PLAYER_NAME == "OLAF":
+            logger.debug('彩蛋：说一下开发者是恶魔，其它没什么变化')
+            tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(LANG_DEVIL,'yellow')}{cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
+            time.sleep(2)
+            tyPrint(f"{LANG_DEALER_VERY_INTERSTING}",sleepTime=TYPRINT_SPEED_UP*0.05)
+        else:
+            tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
+        isPlayerDeath = 0 
+        time.sleep(1)
+        tyPrint(LANG_TAKE_SEAT,sleepTime=TYPRINT_SPEED_UP*0.05)
+        time.sleep(1)
         # 这里是每一局开始前的初始化代码
         for thisRound in range(1,totalRound+1):
             logger.debug(f'局：{thisRound}/{totalRound}')
@@ -980,7 +973,7 @@ def normalGameMainThread(totalRound=3):
             displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,showBullet=True,thisRound=thisRound,totalRound=totalRound,cheatMode=cheatMode)
             tyPrint(f"{LANG_BULLET_SHOW_LIVE_ATHEAD}{cText(thisLive,'red')}{LANG_BULLET_SHOW_LIVE_ATTAIL} {LANG_BULLET_SHOW_BLANK_ATHEAD}{cText(thisBlank,'cyan')}{LANG_BULLET_SHOW_BLANK_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
             time.sleep(5)
-            clear(debugMode)
+            clear()
             # 生命值归零判断主循环
             while not isGameOver:
                 logger.debug(f'进入生命值归零判断主循环')
@@ -996,7 +989,7 @@ def normalGameMainThread(totalRound=3):
                     PLAYER_OBJ.isSkip = False
                     DEALER_OBJ.isSkip = False
                     time.sleep(2)
-                    clear(debugMode)
+                    clear()
                     tyPrint(LANG_BULLET_RELOADING,sleepTime=TYPRINT_SPEED_UP*0.05)
                     time.sleep(2)
                     # 重新分配道具
@@ -1031,7 +1024,7 @@ def normalGameMainThread(totalRound=3):
                     time.sleep(1)
                     tyPrint(f"{LANG_BULLET_SHOW_LIVE_ATHEAD}{cText(thisLive,'red')}{LANG_BULLET_SHOW_LIVE_ATTAIL} {LANG_BULLET_SHOW_BLANK_ATHEAD}{cText(thisBlank,'cyan')}{LANG_BULLET_SHOW_BLANK_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
                     time.sleep(5)
-                    clear(debugMode)
+                    clear()
                 if PHONE_BULLET_INDEX == -1:
                     phoneBulletCheck()
                 # 始终是玩家先手
@@ -1051,7 +1044,7 @@ def normalGameMainThread(totalRound=3):
                     # 检查生命值是否为空
                     if PLAYER_OBJ.health == 0:
                         break
-                    clear(debugMode)
+                    clear()
                     displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=IS_DAMAGE_UP,playerTurn=True,thisRound=thisRound,totalRound=totalRound,dealerLast=DEALER_LAST_BULLET,playerLast=PLAYER_LAST_BULLET,cheatMode=cheatMode)
                     # 检查是否被跳过回合
                     if PLAYER_OBJ.isSkip:
@@ -1066,7 +1059,7 @@ def normalGameMainThread(totalRound=3):
                             PLAYER_OBJ.isSkip = False
                             DEALER_OBJ.isSkip = False
                             break
-                        clear(debugMode)
+                        clear()
                         displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=IS_DAMAGE_UP,playerTurn=True,thisRound=thisRound,totalRound=totalRound,dealerLast=DEALER_LAST_BULLET,playerLast=PLAYER_LAST_BULLET,cheatMode=cheatMode)
                         userCanContinue = True
                         # debug
@@ -1224,7 +1217,7 @@ def normalGameMainThread(totalRound=3):
                                     else:
                                         PLAYER_LAST_BULLET = 1
                                         userCanContinue = False
-                                        clear(debugMode)
+                                        clear()
                                         tyPrint(LANG_SOUND_BOOM,sleepTime=TYPRINT_SPEED_UP*0.1)
                                         time.sleep(1)
                                         tyPrint(LANG_PLAYER_SHOOT_LIVE,sleepTime=TYPRINT_SPEED_UP*0.1,endWithNewLine=False)
@@ -1262,7 +1255,7 @@ def normalGameMainThread(totalRound=3):
                         else:
                             continue
                 logger.debug(f'玩家回合结束')
-                clear(debugMode)
+                clear()
                 # 玩家/庄家是否死亡
                 if PLAYER_OBJ.health <= 0:
                     isGameOver = True
@@ -1274,7 +1267,7 @@ def normalGameMainThread(totalRound=3):
                     PLAYER_OBJ.isSkip = False
                     DEALER_OBJ.isSkip = False
                     time.sleep(2)
-                    clear(debugMode)
+                    clear()
                     tyPrint(LANG_BULLET_RELOADING,sleepTime=TYPRINT_SPEED_UP*0.05)
                     time.sleep(2)
                     # 重新分配道具
@@ -1309,11 +1302,11 @@ def normalGameMainThread(totalRound=3):
                     time.sleep(1)
                     tyPrint(f"{LANG_BULLET_SHOW_LIVE_ATHEAD}{cText(thisLive,'red')}{LANG_BULLET_SHOW_LIVE_ATTAIL} {LANG_BULLET_SHOW_BLANK_ATHEAD}{cText(thisBlank,'cyan')}{LANG_BULLET_SHOW_BLANK_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
                     time.sleep(5)
-                    clear(debugMode)
+                    clear()
                     continue
                 # 然后是庄家
                 IS_DAMAGE_UP = False
-                clear(debugMode)
+                clear()
                 displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=IS_DAMAGE_UP,playerTurn=False,thisRound=thisRound,totalRound=totalRound,dealerLast=DEALER_LAST_BULLET,playerLast=PLAYER_LAST_BULLET,cheatMode=cheatMode)
                 logger.debug(f'庄家回合开始')
                 while not DEALER_OBJ.isSkip:
@@ -1476,7 +1469,7 @@ def normalGameMainThread(totalRound=3):
                         else:
                             DEALER_LAST_BULLET = 1
                             dealerCanContinue = False
-                            clear(debugMode)
+                            clear()
                             tyPrint(LANG_SOUND_BOOM,sleepTime=TYPRINT_SPEED_UP*0.1)
                             time.sleep(1)
                             tyPrint(LANG_DEALER_SHOOT_LIVE,sleepTime=TYPRINT_SPEED_UP*0.1,endWithNewLine=False)
@@ -1510,7 +1503,7 @@ def normalGameMainThread(totalRound=3):
                     PLAYER_OBJ.isSkip = False
                     DEALER_OBJ.isSkip = False
                     time.sleep(2)
-                    clear(debugMode)
+                    clear()
                     tyPrint(LANG_BULLET_RELOADING,sleepTime=TYPRINT_SPEED_UP*0.05)
                     time.sleep(2)
                     # 重新分配道具
@@ -1545,7 +1538,7 @@ def normalGameMainThread(totalRound=3):
                     time.sleep(1)
                     tyPrint(f"{LANG_BULLET_SHOW_LIVE_ATHEAD}{cText(thisLive,'red')}{LANG_BULLET_SHOW_LIVE_ATTAIL} {LANG_BULLET_SHOW_BLANK_ATHEAD}{cText(thisBlank,'cyan')}{LANG_BULLET_SHOW_BLANK_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
                     time.sleep(5)
-                    clear(debugMode)
+                    clear()
                     continue
             logger.debug(f'退出生命值归零判断主循环')
             # 走到这里说明主循环被跳出，检查是谁的生命值归零
@@ -1554,50 +1547,15 @@ def normalGameMainThread(totalRound=3):
             if PLAYER_OBJ.health == 0:
                 logger.debug(f'玩家死亡')
                 tyPrint(LANG_YOU_DIED)
+                time.sleep(5)
                 isPlayerDeath = 1
                 break
             else:
-                clear(debugMode)
+                clear()
                 logger.debug(f'玩家胜利')
                 print(f"{PLAYER_NAME}{LANG_YOU_WIN}")
                 isGameOver=False
+                time.sleep(5)
                 continue
         if isPlayerDeath:
-            time.sleep(3)
-            print("")
-            tyPrint(LANG_PLAYER_CONTINUE_DEATH,sleepTime=TYPRINT_SPEED_UP*0.2)
-            time.sleep(1)
-            print(f"0){LANG_PLAYER_CONTINUE_YES}")
-            print(f"1){LANG_PLAYER_CONTINUE_NO}")
-            userInput = input(">>>")
-            if str(userInput) == '0':
-                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.1)
-                isPlayerDeath = 0
-                time.sleep(2)
-                clear()
-                continue
-            else:
-                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.1)
-                time.sleep(2)
-                clear()
-                break
-        else:
-            time.sleep(3)
-            print("")
-            tyPrint(LANG_PLAYER_CONTINUE_ALIVE,sleepTime=TYPRINT_SPEED_UP*0.2)
-            time.sleep(1)
-            print(f"0){LANG_PLAYER_CONTINUE_YES}")
-            print(f"1){LANG_PLAYER_CONTINUE_NO}")
-            userInput = input(">>>")
-            if str(userInput) == '0':
-                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.7)
-                isPlayerDeath = 0
-                time.sleep(2)
-                clear(debugMode)
-                continue
-            else:
-                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.7)
-                time.sleep(debugMode)
-                clear()
-                break
-            
+            break
