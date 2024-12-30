@@ -42,8 +42,9 @@ def tyPrint(text,sleepTime=0.1,endWithNewLine=True):
     if endWithNewLine:
         print()
 
-def clear():
-    os.system("cls") if os.name == "nt" else os.system("clear")
+def clear(debugMode=False):
+    if not debugMode:
+        os.system("cls") if os.name == "nt" else os.system("clear")
 
 def displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=False,playerTurn=True,showBullet=False,thisRound=1,totalRound=3,dealerLast=-1,playerLast=-1,cheatMode=False):
     console = Console()
