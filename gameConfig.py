@@ -32,4 +32,4 @@ INIT_BULLET_LIST = [[3,2],[1,1],[4,4],[2,3],[1,3],[2,4]]
 # 是否启动debug日志输出(beta)，目前仅支持中文且输出内容有限
 # Enable debug log output(beta) 
 # will output limited content in Chinese for now.
-debugMode = True
+debugMode = False

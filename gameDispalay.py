@@ -112,3 +112,16 @@ def displayDesk(PLAYER_OBJ,DEALER_OBJ,BULLET_LIST,IS_DAMAGE_UP=False,playerTurn=
     table.add_row(playerThisLine1, beenSkip)
     table.add_row(playerThisLine2,  "⚡"*PLAYER_OBJ.health)
     console.print(table)
+
+# 数字累加显示效果，像加油站或者出租车的表的数字一样，可以选择限制函数在多少秒内要显示完毕
+def displayNumberAccumulate(start,end):
+    if start < end:
+        for i in range(start,end+1,len(str(abs(end-start)))*11):
+            print(f"\r{i}",end='',flush=True)
+            time.sleep(10/(abs(end-start)))
+        print()
+    else:
+        for i in range(start,end-1,len(str(abs(start-end)))*-11):
+            print(f"\r{i}",end='',flush=True)
+            time.sleep(10/(abs(end-start)))
+        print()

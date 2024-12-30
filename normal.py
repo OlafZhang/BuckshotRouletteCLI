@@ -86,7 +86,7 @@ class magnifyingGlass(object):
 class handcuffs(object):
     def __init__(self):
         self.name = "handcuffs"
-        self.emoji = "⛓️‍💥"
+        self.emoji = "⛓️"
     def use():
         return True
 
@@ -281,7 +281,7 @@ class Player(object):
             tyPrint(LANG_PLAYER_USE_PHONE,sleepTime=TYPRINT_SPEED_UP*0.1)
             getIndex,getType = phone.use()
             time.sleep(2)
-            if getIndex == -1:
+            if getIndex <= -1:
                 tyPrint(LANG_HOW_UNFORTUNATE_RED,sleepTime=TYPRINT_SPEED_UP*0.1)
             else:
                 tyPrint(f"{LANG_PLAYER_USE_PHONE_EXPLANATION_ATHEAD}{getIndex+1}{LANG_PLAYER_USE_PHONE_EXPLANATION_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.1,endWithNewLine=False)                        
@@ -534,7 +534,7 @@ class Dealer(object):
                 time.sleep(2)
                 # 更新AI记忆
                 getIndex,getType = phone.use()
-                if getIndex == -1:
+                if getIndex <= -1:
                     pass
                 else:
                     self.memory[getIndex+CURRENT_BULLET_INDEX] = getType
@@ -862,7 +862,7 @@ def signWaiver():
 def phoneBulletCheck():
     global PHONE_BULLET_INDEX,BULLET_LIST,CURRENT_BULLET_INDEX
     if len(BULLET_LIST) < 3:
-        PHONE_BULLET_INDEX = -1
+        PHONE_BULLET_INDEX <= -1
         return -1
     if PHONE_BULLET_INDEX in [2,len(BULLET_LIST)-1]:
         PHONE_BULLET_INDEX -= CURRENT_BULLET_INDEX
@@ -889,6 +889,7 @@ def normalGameMainThread(totalRound=3):
     while True:
         clear()
         logger.debug('游戏主循环开始')
+<<<<<<< Updated upstream
         signWaiver()
         # 彩蛋
         # 树懒都很慢
@@ -914,6 +915,35 @@ def normalGameMainThread(totalRound=3):
         time.sleep(1)
         tyPrint(LANG_TAKE_SEAT,sleepTime=TYPRINT_SPEED_UP*0.05)
         time.sleep(1)
+=======
+        if PLAYER_NAME == "":
+            totalDollar = 0
+            signWaiver()
+            # 彩蛋
+            # 树懒都很慢
+            if PLAYER_NAME == "FOLIVO":
+                logger.debug('彩蛋：玩家为树懒时，TYPRINT_SPEED_UP设置为5，这会导致tyPrint方法输出变得非常慢')
+                TYPRINT_SPEED_UP = 5
+            # 你很急？
+            if PLAYER_NAME == "HURRY":
+                logger.debug('彩蛋：玩家很急，TYPRINT_SPEED_UP设置为0.05，这会导致tyPrint方法效果与print方法几乎一致')
+                TYPRINT_SPEED_UP = 0.05
+            if PLAYER_NAME == "JESUS":
+                logger.debug('彩蛋：耶稣能在装弹前看到本轮弹夹的子弹顺序')
+                cheatMode = True
+            # 开发者可以是恶魔
+            if PLAYER_NAME == "OLAF":
+                logger.debug('彩蛋：说一下开发者是恶魔，其它没什么变化')
+                tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(LANG_DEVIL,'yellow')} {cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
+                time.sleep(2)
+                tyPrint(f"{LANG_DEALER_VERY_INTERSTING}",sleepTime=TYPRINT_SPEED_UP*0.05)
+            else:
+                tyPrint(f"{LANG_SAY_HELLO_ATHEAD}{cText(PLAYER_NAME,'yellow')}{LANG_SAY_HELLO_ATTAIL}",sleepTime=TYPRINT_SPEED_UP*0.05)
+            isPlayerDeath = 0 
+            time.sleep(1)
+            tyPrint(LANG_TAKE_SEAT,sleepTime=TYPRINT_SPEED_UP*0.05)
+            time.sleep(1)
+>>>>>>> Stashed changes
         # 这里是每一局开始前的初始化代码
         for thisRound in range(1,totalRound+1):
             logger.debug(f'局：{thisRound}/{totalRound}')
@@ -1547,15 +1577,69 @@ def normalGameMainThread(totalRound=3):
             if PLAYER_OBJ.health == 0:
                 logger.debug(f'玩家死亡')
                 tyPrint(LANG_YOU_DIED)
+<<<<<<< Updated upstream
                 time.sleep(5)
+=======
+                time.sleep(3)
+>>>>>>> Stashed changes
                 isPlayerDeath = 1
                 break
             else:
                 clear()
                 logger.debug(f'玩家胜利')
                 print(f"{PLAYER_NAME}{LANG_YOU_WIN}")
+                time.sleep(3)
                 isGameOver=False
                 time.sleep(5)
                 continue
         if isPlayerDeath:
+<<<<<<< Updated upstream
             break
+=======
+            print("")
+            tyPrint(LANG_PLAYER_CONTINUE_DEATH,sleepTime=TYPRINT_SPEED_UP*0.2)
+            time.sleep(1)
+            print(f"0){LANG_PLAYER_CONTINUE_YES}")
+            print(f"1){LANG_PLAYER_CONTINUE_NO}")
+            userInput = input(">>>")
+            if str(userInput) == '0':
+                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.1)
+                isPlayerDeath = 0
+                PLAYER_NAME = ""
+                totalDollar = 0
+                time.sleep(2)
+                clear()
+                continue
+            else:
+                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.1)
+                time.sleep(2)
+                clear()
+                break
+        else:
+            # 检查玩家当前钱数是70000的多少倍
+            dollarTimes = totalDollar // 70000
+            thisTimeDollar = random.randint(70000*(dollarTimes+1),80000*(dollarTimes+1))
+            print("$:")
+            time.sleep(1)
+            displayNumberAccumulate(totalDollar,thisTimeDollar)
+            totalDollar = thisTimeDollar
+            print("")
+            time.sleep(1)
+            tyPrint(LANG_PLAYER_CONTINUE_ALIVE,sleepTime=TYPRINT_SPEED_UP*0.2)
+            time.sleep(1)
+            print(f"0){LANG_PLAYER_CONTINUE_YES}")
+            print(f"1){LANG_PLAYER_CONTINUE_NO}")
+            userInput = input(">>>")
+            if str(userInput) == '0':
+                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.7)
+                isPlayerDeath = 0
+                time.sleep(2)
+                clear(debugMode)
+                continue
+            else:
+                tyPrint("...",sleepTime=TYPRINT_SPEED_UP*0.7)
+                time.sleep(debugMode)
+                clear()
+                break
+            
+>>>>>>> Stashed changes
